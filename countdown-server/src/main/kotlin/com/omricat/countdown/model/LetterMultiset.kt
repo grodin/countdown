@@ -3,38 +3,71 @@ package com.omricat.countdown.model
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.map
-import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.mapResult
-import com.github.michaelbull.result.unwrap
-import com.omricat.countdown.model.LetterMultiset.Error.ArithmeticError
+import com.github.michaelbull.result.runCatching
+import com.github.michaelbull.result.throwUnless
 import com.omricat.countdown.model.LetterMultiset.Error.NotEnglishLowercaseError
+import com.github.michaelbull.result.fold as foldResult
 
 /**
  * A class which represents the multiset of letters contained in an English word.
  */
 class LetterMultiset
-private constructor(private val elements: List<Char>) :
-  Collection<Char> by elements {
+private constructor(private val letters: List<Pair<Char, UShort>>) {
 
-  private val hashResult: Result<Long, ArithmeticError> by lazy { computePrimePowerHash() }
-
-  private fun computePrimePowerHash(): Result<Long, ArithmeticError> =
-    primePowerDecomposition.computeValue().mapError { ArithmeticError }
-
-
-  val primePowerDecomposition by lazy {
-    computePrimePowers()
+  private val mapOfLetters: Map<Char, UShort> by lazy {
+    letters.associate { it }
   }
 
-  private fun computePrimePowers(): PrimePowerDecomposition =
-    elements.groupBy { c: Char ->
-      alphaToPrime.getValue(c)
-    }.mapValues { (_, list) -> list.size }
-      .let { PrimePowerDecomposition(it) }
+  val hashResult: Result<Long, ArithmeticException> by lazy { computePrimePowerHash() }
 
-  val hash get() = hashResult.unwrap()
+  private fun computePrimePowerHash(): Result<Long, ArithmeticException> =
+    mapOfLetters.mapKeys { (c, _) -> alphaToPrime.getValue(c) }
+      .map { (prime, count) ->
+        prime.power(count)
+      }.product()
+
+  private fun Prime.power(power: UShort): Long {
+    var acc = 1L
+    repeat(power.toInt()) {
+      acc *= value
+    }
+    return acc
+  }
+
+  @Suppress("UNCHECKED_CAST")
+  private fun Iterable<Long>.product(): Result<Long, ArithmeticException> =
+    foldResult(1L) { acc, t ->
+      runCatching {
+        Math.multiplyExact(acc, t)
+      }
+    }.throwUnless { it is ArithmeticException }
+        as Result<Long, ArithmeticException>
+
+  /**
+   * Computes the set of all sub-multisets of this [LetterMultiset].
+   *
+   * N.B. Iteration order of the returned set is not specified.
+   */
+  fun subMultiSets(): Set<LetterMultiset> =
+    BitSet.allOfWidth(letters.size)
+      .flatMap { bitset ->
+        letters.subListsByBitSet(bitset).map { LetterMultiset(it) }
+      }.toSet()
+
+  /**
+   * Computes whether this [LetterMultiset] is a sub-multiset of the other.
+   */
+  fun isSubsetOf(other: LetterMultiset): Boolean =
+    mapOfLetters.all { (c, count) ->
+      other.mapOfLetters[c]?.let { otherCount -> otherCount >= count } ?: false
+    }
+
+  /**
+   * Computes whether this [LetterMultiset] is a super-multiset of the other.
+   */
+  fun isSupersetOf(other: LetterMultiset): Boolean = other.isSubsetOf(this)
 
   companion object {
     fun fromWord(word: String): Result<LetterMultiset, Error> =
@@ -45,21 +78,12 @@ private constructor(private val elements: List<Char>) :
             NotEnglishLowercaseError(c)
           )
         }
-        .map { LetterMultiset(it) }
-
-        // Compute the hash in advance so that construction fails fast if
-        // the hash is too big to fit in a long
-        .andThen { multiset -> multiset.hashResult.map { multiset } }
-
-    fun fromPrimePowerDecomposition(decomposition: PrimePowerDecomposition):
-        Result<LetterMultiset, Error> =
-      LetterMultiset.fromWord(
-        decomposition.powers.flatMap { (prime, power) ->
-          List(power) { alphaToPrime.inverseBiMap().getValue(prime) }
+        .map { chars ->
+          LetterMultiset(
+            chars.groupBy { it }
+              .mapValues { (_, list) -> list.size.toUShort() }.toList()
+          )
         }
-          .joinToString(separator = "")
-      )
-
   }
 
   override fun equals(other: Any?): Boolean {
@@ -68,24 +92,27 @@ private constructor(private val elements: List<Char>) :
 
     other as LetterMultiset
 
-    if (elements!= other.elements) return false
+    if (letters != other.letters) return false
 
     return true
   }
 
   override fun hashCode(): Int {
-    return elements.hashCode()
+    return letters.hashCode()
   }
 
   override fun toString(): String {
-    return "LetterMultiset(elements=$elements)"
+    val letterString =
+      letters.joinToString(separator = "") { (c, count) ->
+        "$c".repeat(count.toInt())
+      }
+    return "LetterMultiset(elements=$letterString)"
   }
 
   sealed interface Error {
-
     data class NotEnglishLowercaseError(val char: Char) : Error
-    object ArithmeticError : Error
   }
+
 }
 
 private val alphaToPrime: BiMap<Char, Prime> = listOf(
