@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection")
+
 package com.omricat.countdown.model
 
 import com.github.michaelbull.result.unwrap
