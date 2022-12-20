@@ -1,15 +1,15 @@
 package com.omricat.countdown.model
 
 
-interface BiMap<E : Any, F : Any> : Map<E, F> {
+internal interface BiMap<E : Any, F : Any> : Map<E, F> {
   override val values: Set<F>
   fun inverseBiMap(): BiMap<F, E>
 }
 
-fun <E : Any, F : Any> Map<E, F>.toBiMap(): BiMap<E, F> = ImmutableBiMap(this)
+internal fun <E : Any, F : Any> Map<E, F>.toBiMap(): BiMap<E, F> = ImmutableBiMap(this)
 
 
-class ImmutableBiMap<E : Any, F : Any>
+internal class ImmutableBiMap<E : Any, F : Any>
 private constructor(
   private val directMap: Map<E, F>,
   private val inverseMap: Map<F, E>

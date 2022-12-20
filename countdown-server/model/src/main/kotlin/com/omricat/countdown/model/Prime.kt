@@ -4,10 +4,10 @@ package com.omricat.countdown.model
  * Represents a prime number. Construction is not checked, so could hold anything
  */
 @JvmInline
-value class Prime internal constructor(val value: Int) : Comparable<Prime> {
-  companion object {
+public value class Prime internal constructor(public val value: Int) : Comparable<Prime> {
+  public companion object {
 
-    fun first26() = listOf(
+    public fun first26(): List<Prime> = listOf(
       2,
       3,
       5,

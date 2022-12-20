@@ -7,17 +7,17 @@ import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapResult
 
 @JvmInline
-value class Word private constructor(val value: List<Char>) {
-  companion object {
-    operator fun invoke(word: String): Result<Word, Error> =
+public value class Word private constructor(public val value: List<Char>) {
+  public companion object {
+    public operator fun invoke(word: String): Result<Word, Error> =
       word.toList()
         .mapResult { c ->
           if (c in 'a'..'z') Ok(c) else Err(Error.NotEnglishLowercaseError(c))
         }.map { Word(it) }
   }
 
-  sealed interface Error {
-    data class NotEnglishLowercaseError(val char: Char) : Error
+  public sealed interface Error {
+    public data class NotEnglishLowercaseError(val char: Char) : Error
   }
 
   override fun toString(): String = value.joinToString("")

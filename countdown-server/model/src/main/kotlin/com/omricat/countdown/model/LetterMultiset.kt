@@ -8,14 +8,14 @@ import com.github.michaelbull.result.fold as foldResult
 /**
  * A class which represents the multiset of letters contained in an English word.
  */
-class LetterMultiset
+public class LetterMultiset
 private constructor(private val letters: List<Pair<Char, UShort>>) {
 
   private val mapOfLetters: Map<Char, UShort> by lazy {
     letters.associate { it }
   }
 
-  val hashResult: Result<Long, ArithmeticException> by lazy { computePrimePowerHash() }
+  public val hashResult: Result<Long, ArithmeticException> by lazy { computePrimePowerHash() }
 
   private fun computePrimePowerHash(): Result<Long, ArithmeticException> =
     mapOfLetters.mapKeys { (c, _) -> alphaToPrime.getValue(c) }
@@ -45,7 +45,7 @@ private constructor(private val letters: List<Pair<Char, UShort>>) {
    *
    * N.B. Iteration order of the returned set is not specified.
    */
-  fun subMultiSets(): Set<LetterMultiset> =
+  public fun subMultiSets(): Set<LetterMultiset> =
     BitSet.allOfWidth(letters.size)
       .flatMap { bitset ->
         letters.subListsByBitSet(bitset).map { LetterMultiset(it) }
@@ -54,7 +54,7 @@ private constructor(private val letters: List<Pair<Char, UShort>>) {
   /**
    * Computes whether this [LetterMultiset] is a sub-multiset of the other.
    */
-  fun isSubsetOf(other: LetterMultiset): Boolean =
+  public fun isSubsetOf(other: LetterMultiset): Boolean =
     mapOfLetters.all { (c, count) ->
       other.mapOfLetters[c]?.let { otherCount -> otherCount >= count } ?: false
     }
@@ -62,10 +62,10 @@ private constructor(private val letters: List<Pair<Char, UShort>>) {
   /**
    * Computes whether this [LetterMultiset] is a super-multiset of the other.
    */
-  fun isSupersetOf(other: LetterMultiset): Boolean = other.isSubsetOf(this)
+  public fun isSupersetOf(other: LetterMultiset): Boolean = other.isSubsetOf(this)
 
-  companion object {
-    fun fromWord(word: Word): LetterMultiset =
+  public companion object {
+    public fun fromWord(word: Word): LetterMultiset =
       word.value
         .sorted()
         .let { chars ->
