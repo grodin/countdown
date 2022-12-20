@@ -5,7 +5,16 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapResult
+import com.github.michaelbull.result.unwrap
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
+@Serializable(with = Word.WordSerializer::class)
 @JvmInline
 public value class Word private constructor(public val value: List<Char>) {
   public companion object {
@@ -21,4 +30,16 @@ public value class Word private constructor(public val value: List<Char>) {
   }
 
   override fun toString(): String = value.joinToString("")
+
+  internal object WordSerializer : KSerializer<Word> {
+    override val descriptor: SerialDescriptor =
+      PrimitiveSerialDescriptor("Word", PrimitiveKind.STRING)
+
+    override fun serialize(encoder: Encoder, value: Word) {
+      encoder.encodeString(value.toString())
+    }
+
+    override fun deserialize(decoder: Decoder): Word =
+      Word(decoder.decodeString()).unwrap()
+  }
 }

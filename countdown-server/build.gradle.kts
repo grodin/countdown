@@ -2,6 +2,7 @@
 
 plugins {
   id("org.jetbrains.kotlin.jvm") version "1.7.21"
+  kotlin("plugin.serialization") version "1.7.21"
   application
 }
 
@@ -22,7 +23,7 @@ allprojects {
   }
 
   kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
   }
 
   testing {
@@ -37,6 +38,7 @@ allprojects {
 dependencies {
   implementation(platform(kotlin("bom")))
   implementation(project(":model"))
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.4.1")
 }
 
 testing {
