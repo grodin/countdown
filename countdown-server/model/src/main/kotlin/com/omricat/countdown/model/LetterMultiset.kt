@@ -1,10 +1,5 @@
 package com.omricat.countdown.model
 
-import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.runCatching
-import com.github.michaelbull.result.throwUnless
-import com.github.michaelbull.result.fold as foldResult
-
 /**
  * A class which represents the multiset of letters contained in an English word.
  */
@@ -14,31 +9,6 @@ private constructor(private val letters: List<Pair<Char, UShort>>) {
   private val mapOfLetters: Map<Char, UShort> by lazy {
     letters.associate { it }
   }
-
-  public val hashResult: Result<Long, ArithmeticException> by lazy { computePrimePowerHash() }
-
-  private fun computePrimePowerHash(): Result<Long, ArithmeticException> =
-    mapOfLetters.mapKeys { (c, _) -> alphaToPrime.getValue(c) }
-      .map { (prime, count) ->
-        prime.power(count)
-      }.product()
-
-  private fun Prime.power(power: UShort): Long {
-    var acc = 1L
-    repeat(power.toInt()) {
-      acc *= value
-    }
-    return acc
-  }
-
-  @Suppress("UNCHECKED_CAST")
-  private fun Iterable<Long>.product(): Result<Long, ArithmeticException> =
-    foldResult(1L) { acc, t ->
-      runCatching {
-        Math.multiplyExact(acc, t)
-      }
-    }.throwUnless { it is ArithmeticException }
-        as Result<Long, ArithmeticException>
 
   /**
    * Computes the set of all sub-multisets of this [LetterMultiset].
@@ -99,32 +69,3 @@ private constructor(private val letters: List<Pair<Char, UShort>>) {
     return "LetterMultiset(elements=$letterString)"
   }
 }
-
-private val alphaToPrime: BiMap<Char, Prime> = listOf(
-  'e',
-  't',
-  'a',
-  'o',
-  'i',
-  'n',
-  's',
-  'r',
-  'h',
-  'd',
-  'l',
-  'u',
-  'c',
-  'm',
-  'f',
-  'y',
-  'w',
-  'g',
-  'p',
-  'b',
-  'v',
-  'k',
-  'x',
-  'q',
-  'j',
-  'z',
-).zip(Prime.first26()).toMap().toBiMap()
