@@ -1,13 +1,8 @@
 package com.omricat.countdown.model
 
-import com.github.michaelbull.result.Err
-import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import com.github.michaelbull.result.map
-import com.github.michaelbull.result.mapResult
 import com.github.michaelbull.result.runCatching
 import com.github.michaelbull.result.throwUnless
-import com.omricat.countdown.model.LetterMultiset.Error.NotEnglishLowercaseError
 import com.github.michaelbull.result.fold as foldResult
 
 /**
@@ -70,15 +65,10 @@ private constructor(private val letters: List<Pair<Char, UShort>>) {
   fun isSupersetOf(other: LetterMultiset): Boolean = other.isSubsetOf(this)
 
   companion object {
-    fun fromWord(word: String): Result<LetterMultiset, Error> =
-      word.toList()
+    fun fromWord(word: Word): LetterMultiset =
+      word.value
         .sorted()
-        .mapResult { c ->
-          if (c in 'a'..'z') Ok(c) else Err(
-            NotEnglishLowercaseError(c)
-          )
-        }
-        .map { chars ->
+        .let { chars ->
           LetterMultiset(
             chars.groupBy { it }
               .mapValues { (_, list) -> list.size.toUShort() }.toList()
@@ -108,11 +98,6 @@ private constructor(private val letters: List<Pair<Char, UShort>>) {
       }
     return "LetterMultiset(elements=$letterString)"
   }
-
-  sealed interface Error {
-    data class NotEnglishLowercaseError(val char: Char) : Error
-  }
-
 }
 
 private val alphaToPrime: BiMap<Char, Prime> = listOf(

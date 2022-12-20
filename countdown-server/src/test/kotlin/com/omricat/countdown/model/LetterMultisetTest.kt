@@ -10,16 +10,16 @@ class LetterMultisetTest {
 
   @Test
   fun `can check if multiset is subset of another`() {
-    val set1 = LetterMultiset.fromWord("aabbc").unwrap()
-    val set2 = LetterMultiset.fromWord("abc").unwrap()
+    val set1 = LetterMultiset.fromWord(Word("aabbc").unwrap())
+    val set2 = LetterMultiset.fromWord(Word("abc").unwrap())
 
     assertTrue(set2.isSubsetOf(set1))
   }
 
   @Test
   fun `anagrams are sub and supersets of each other`() {
-    val set1 = LetterMultiset.fromWord("aabcc").unwrap()
-    val set2 = LetterMultiset.fromWord("cabac").unwrap()
+    val set1 = LetterMultiset.fromWord(Word("aabcc").unwrap())
+    val set2 = LetterMultiset.fromWord(Word("cabac").unwrap())
 
     assertTrue(set1.isSubsetOf(set2))
     assertTrue(set1.isSupersetOf(set2))
@@ -27,8 +27,8 @@ class LetterMultisetTest {
 
   @Test
   fun `can distinguish when neither is subset of other`() {
-    val set1 = LetterMultiset.fromWord("poker").unwrap()
-    val set2 = LetterMultiset.fromWord("keeper").unwrap()
+    val set1 = LetterMultiset.fromWord(Word("poker").unwrap())
+    val set2 = LetterMultiset.fromWord(Word("keeper").unwrap())
 
     assertFalse(set1.isSubsetOf(set2))
     assertFalse(set1.isSupersetOf(set2))
@@ -36,7 +36,7 @@ class LetterMultisetTest {
 
   @Test
   fun `can compute all sub-multisets`() {
-    val set = LetterMultiset.fromWord("aabc").unwrap()
+    val set = LetterMultiset.fromWord(Word("aabc").unwrap())
     val subsets = set.subMultiSets()
 
     val expectedSubsets = listOf(
@@ -45,7 +45,7 @@ class LetterMultisetTest {
       "aa", "ab", "aab", "ac", "aac",
       "bc",
       "abc", "aabc"
-    ).map { LetterMultiset.fromWord(it).unwrap() }.toSet()
+    ).map { LetterMultiset.fromWord(Word(it).unwrap()) }.toSet()
 
     assertEquals(expectedSubsets, subsets)
   }
