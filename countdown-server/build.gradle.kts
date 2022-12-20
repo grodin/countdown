@@ -5,22 +5,43 @@ plugins {
   application
 }
 
-repositories {
-  mavenCentral()
+
+allprojects {
+  apply {
+    plugin("org.jetbrains.kotlin.jvm")
+  }
+
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    implementation(kotlin("stdlib-jdk8"))
+
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
+  }
+
+  kotlin {
+    jvmToolchain(11)
+  }
+
+  testing {
+    suites {
+      val test by getting(JvmTestSuite::class) {
+        useKotlinTest()
+      }
+    }
+  }
 }
 
 dependencies {
-  implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
-
-  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-
-  implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
+  implementation(platform(kotlin("bom")))
+  implementation(project(":model"))
 }
 
 testing {
   suites {
     val test by getting(JvmTestSuite::class) {
-      // Use Kotlin Test test framework
       useKotlinTest()
     }
   }
