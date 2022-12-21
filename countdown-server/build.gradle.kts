@@ -39,6 +39,16 @@ dependencies {
   implementation(platform(kotlin("bom")))
   implementation(project(":model"))
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.4.1")
+
+  fun http4k(module: String, version: String? = null) =
+    "org.http4k:http4k-$module${version?.let { ":$it" } ?: ""}"
+  implementation(platform(http4k("bom", version = "4.34.4.0")))
+  implementation(http4k("core"))
+  implementation(http4k("server-jetty"))
+  implementation(http4k("format-kotlinx-serialization"))
+  implementation(http4k("contract"))
+
+  testImplementation(http4k("client-okhttp"))
 }
 
 testing {
