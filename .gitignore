@@ -20,6 +20,7 @@ out/
 *.iws
 
 # Gradle
+.gradle
 build/
 
 # JVM error logs
