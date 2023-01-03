@@ -3,11 +3,12 @@ package com.omricat.countdown.dictionary
 import com.omricat.countdown.model.LetterMultiset
 import com.omricat.countdown.model.Word
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.protobuf.ProtoBuf
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
 import java.io.IOException
 
-private const val DICTIONARY_FILE_NAME = "/dictionary_proto_encoded"
+private const val DICTIONARY_FILE_NAME = "/dictionary.json"
 
 @JvmInline
 value class Dictionary(private val dictionary: Map<LetterMultiset, List<Word>>) {
@@ -21,10 +22,10 @@ value class Dictionary(private val dictionary: Map<LetterMultiset, List<Word>>) 
   companion object {
     fun loadFromResources(): Dictionary =
       Dictionary(
-        ProtoBuf.decodeFromByteArray(
+        Json.decodeFromStream(
           serializer(),
-          Dictionary::class.java.getResource(DICTIONARY_FILE_NAME)
-            ?.readBytes()
+          Dictionary::class.java.getResourceAsStream(DICTIONARY_FILE_NAME)
+
             ?: throw IOException("Unable to load dictionary from resources")
         )
       )
