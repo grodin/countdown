@@ -11,12 +11,13 @@ import com.github.michaelbull.result.mapResult
 import com.github.michaelbull.result.onFailure
 import com.omricat.countdown.model.LetterMultiset
 import com.omricat.countdown.model.Word
+import kotlinx.serialization.BinaryFormat
 import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.SerialFormat
+import kotlinx.serialization.StringFormat
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.protobuf.ProtoBuf
 import kotlinx.serialization.serializer
+import java.io.PrintStream
 
 
 internal typealias Dictionary = Map<LetterMultiset, List<Word>>
@@ -46,7 +47,7 @@ public object PreProcessor {
       }
     return letterMultisets.mapError { Error.Wrapped(it) }
       .andThen { map ->
-        System.out.writeBytes(map.encodeToByteArray())
+        map.writeToStdOut(Json)
         Ok(Unit)
       }
   }
@@ -57,12 +58,20 @@ public object PreProcessor {
       Error
   }
 
-  internal val defaultProtoBuf by lazy { ProtoBuf }
 }
 
-internal fun Dictionary.encodeToByteArray(
-  serializer: SerializationStrategy<Dictionary> = serializer(),
-  protoBuf: ProtoBuf = PreProcessor.defaultProtoBuf
-): ByteArray =
-  protoBuf.encodeToByteArray(serializer, this)
+internal fun Dictionary.writeToStdOut(
+  serialFormat: SerialFormat, printStream: PrintStream = System.out
+): Unit =
+  when (serialFormat) {
+    is BinaryFormat -> printStream.writeBytes(
+      serialFormat.encodeToByteArray(serializer(), this)
+    )
+
+    is StringFormat -> printStream.print(
+      serialFormat.encodeToString(serializer(), this)
+    )
+
+    else -> throw UnsupportedOperationException("Don't know how to encode with SerialFormat $serialFormat")
+  }
 
