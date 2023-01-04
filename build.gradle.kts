@@ -38,7 +38,7 @@ allprojects {
 dependencies {
   implementation(platform(kotlin("bom")))
   implementation(project(":model"))
-  implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.4.1")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
   fun http4k(module: String, version: String? = null) =
     "org.http4k:http4k-$module${version?.let { ":$it" } ?: ""}"
