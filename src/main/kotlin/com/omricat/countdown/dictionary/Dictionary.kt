@@ -16,7 +16,7 @@ value class Dictionary(private val dictionary: Map<LetterMultiset, List<Word>>) 
     dictionary[letterMultiset] ?: emptyList()
 
   fun contains(word: Word): Boolean =
-    dictionary[LetterMultiset.fromWord(word)]?.contains(word) ?: false
+    get(LetterMultiset.fromWord(word)).contains(word)
 
   @OptIn(ExperimentalSerializationApi::class)
   companion object {
